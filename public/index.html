@@ -1174,14 +1174,29 @@
                         </div>
                         <div class="item-actions">
                             ${campaign.status === 'draft' ? 
-                                `<button class="btn btn-small" onclick="sendCampaign(${campaign.id})">Send</button>` : 
+                                `<button class="btn btn-small send-campaign-btn" data-campaign-id="${campaign.id}">Send</button>` : 
                                 ''
                             }
-                            <button class="btn btn-small btn-danger" onclick="deleteCampaign(${campaign.id})">Delete</button>
+                            <button class="btn btn-small btn-danger delete-campaign-btn" data-campaign-id="${campaign.id}">Delete</button>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            // Add event listeners for campaign buttons
+            container.querySelectorAll('.send-campaign-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const campaignId = this.getAttribute('data-campaign-id');
+                    sendCampaign(campaignId);
+                });
+            });
+
+            container.querySelectorAll('.delete-campaign-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const campaignId = this.getAttribute('data-campaign-id');
+                    deleteCampaign(campaignId);
+                });
+            });
         }
 
         async function createCampaign() {
