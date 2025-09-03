@@ -682,34 +682,61 @@
                     makeRequest(`${API_BASE}/campaigns`)
                 ]);
 
-                const dashboardData = await dashboardResponse.json();
-                const sitesData = await sitesResponse.json();
-                const contactsData = await contactsResponse.json();
-                const campaignsData = await campaignsResponse.json();
-
-                // Load stats
+                // Load stats (with fallback)
                 if (dashboardResponse.ok) {
+                    const dashboardData = await dashboardResponse.json();
                     loadStats(dashboardData.stats);
+                } else {
+                    // Fallback stats
+                    loadStats({
+                        sites: 0,
+                        contacts: 0,
+                        campaigns: 0,
+                        limits: { sites: 3, contacts: 50, campaigns: 3 }
+                    });
                 }
 
                 // Load sites
                 if (sitesResponse.ok) {
+                    const sitesData = await sitesResponse.json();
                     loadSites(sitesData);
+                } else {
+                    console.error('Failed to load sites:', await sitesResponse.text());
+                    loadSites([]);
                 }
 
                 // Load contacts
                 if (contactsResponse.ok) {
+                    const contactsData = await contactsResponse.json();
                     loadContacts(contactsData);
+                } else {
+                    console.error('Failed to load contacts:', await contactsResponse.text());
+                    loadContacts([]);
                 }
 
                 // Load campaigns
                 if (campaignsResponse.ok) {
+                    const campaignsData = await campaignsResponse.json();
                     loadCampaigns(campaignsData);
+                } else {
+                    console.error('Failed to load campaigns:', await campaignsResponse.text());
+                    loadCampaigns([]);
                 }
 
             } catch (error) {
                 console.error('Dashboard loading error:', error);
-                showMessage('Failed to load dashboard data', 'error');
+                showMessage('Failed to load some dashboard data', 'error');
+                
+                // Load empty fallbacks
+                loadStats({
+                    sites: 0,
+                    contacts: 0,
+                    campaigns: 0,
+                    limits: { sites: 3, contacts: 50, campaigns: 3 }
+                });
+                loadSites([]);
+                loadContacts([]);
+                loadCampaigns([]);
             }
         }
 
