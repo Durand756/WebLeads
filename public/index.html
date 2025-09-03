@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - SEO & Email Marketing SaaS</title>
+    <title>SEO & Email Marketing SaaS</title>
     <style>
         * {
             margin: 0;
@@ -16,18 +16,33 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .auth-container {
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
 
-        .auth-card {
+        .auth-card, .dashboard-card {
             background: white;
             border-radius: 12px;
             padding: 32px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 400px;
+        }
+
+        .dashboard-card {
+            max-width: none;
+            margin-bottom: 24px;
         }
 
         .logo {
@@ -58,7 +73,7 @@
             color: #333;
         }
 
-        .form-group input {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e1e5e9;
@@ -67,19 +82,9 @@
             transition: border-color 0.3s;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group textarea:focus {
             outline: none;
             border-color: #667eea;
-        }
-
-        .form-group input.error {
-            border-color: #dc3545;
-        }
-
-        .error-text {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 4px;
         }
 
         .btn {
@@ -93,9 +98,6 @@
             cursor: pointer;
             transition: transform 0.2s;
             width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .btn:hover:not(:disabled) {
@@ -106,6 +108,21 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+            width: auto;
+            margin: 4px;
         }
 
         .auth-switch {
@@ -140,6 +157,267 @@
             border: 1px solid #f5c6cb;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
+        .dashboard {
+            display: grid;
+            gap: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .stat-limit {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e1e5e9;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .item-list {
+            margin-top: 20px;
+        }
+
+        .item {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info h4 {
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .item-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            margin-left: 12px;
+        }
+
+        .score.excellent { background: #28a745; }
+        .score.good { background: #17a2b8; }
+        .score.average { background: #ffc107; color: #333; }
+        .score.poor { background: #dc3545; }
+
+        .recommendations {
+            margin-top: 16px;
+        }
+
+        .recommendation {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .recommendation.critical {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .recommendation.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .recommendation.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+
+        .user-info {
+            color: #666;
+        }
+
+        .logout-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .item-actions {
+                align-self: stretch;
+            }
+        }
+
+        .campaign-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .mini-stat {
+            text-align: center;
+            padding: 8px;
+            background: #f1f3f4;
+            border-radius: 6px;
+        }
+
+        .mini-stat-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .mini-stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
         .spinner {
             display: inline-block;
             width: 16px;
@@ -150,256 +428,202 @@
             animation: spin 1s linear infinite;
             margin-left: 8px;
         }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .password-requirements {
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
-        }
-
-        .requirement {
-            margin: 2px 0;
-        }
-
-        .requirement.valid {
-            color: #28a745;
-        }
-
-        .requirement.invalid {
-            color: #dc3545;
-        }
-
-        .requirement::before {
-            content: "• ";
-        }
     </style>
 </head>
 <body>
-    <div class="auth-card">
-        <div class="logo">
-            <h1>SaaS Hub</h1>
-            <p>SEO Analysis & Email Marketing</p>
-        </div>
-
-        <div id="messageContainer"></div>
-
-        <form id="signupForm">
-            <div class="form-group">
-                <label for="signupName">Full Name</label>
-                <input type="text" id="signupName" name="name" required autocomplete="name">
-                <div id="nameError" class="error-text hidden"></div>
+    <!-- Authentication Section -->
+    <div id="authSection" class="auth-container">
+        <div class="auth-card">
+            <div class="logo">
+                <h1>SaaS Hub</h1>
+                <p>SEO Analysis & Email Marketing</p>
             </div>
-            
-            <div class="form-group">
-                <label for="signupEmail">Email Address</label>
-                <input type="email" id="signupEmail" name="email" required autocomplete="email">
-                <div id="emailError" class="error-text hidden"></div>
-            </div>
-            
-            <div class="form-group">
-                <label for="signupPassword">Password</label>
-                <input type="password" id="signupPassword" name="password" required minlength="6" autocomplete="new-password">
-                <div id="passwordError" class="error-text hidden"></div>
-                <div class="password-requirements">
-                    <div id="lengthReq" class="requirement invalid">At least 6 characters</div>
-                    <div id="letterReq" class="requirement invalid">At least one letter</div>
-                    <div id="numberReq" class="requirement invalid">At least one number</div>
+
+            <div id="messageContainer"></div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn" id="loginBtn">
+                        Sign In
+                        <span id="loginSpinner" class="spinner hidden"></span>
+                    </button>
+                </form>
+                <div class="auth-switch">
+                    Don't have an account? <a onclick="showSignup()">Sign up</a>
                 </div>
             </div>
-            
-            <button type="submit" class="btn" id="signupBtn">
-                Create Account
-                <span id="signupSpinner" class="spinner hidden"></span>
-            </button>
-        </form>
-        
-        <div class="auth-switch">
-            Already have an account? <a id="loginLink">Sign in</a>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="hidden">
+                <form id="signupFormElement">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" name="name" required autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" name="email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" name="password" required minlength="6" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn" id="signupBtn">
+                        Create Account
+                        <span id="signupSpinner" class="spinner hidden"></span>
+                    </button>
+                </form>
+                <div class="auth-switch">
+                    Already have an account? <a onclick="showLogin()">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="hidden">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div>
+                    <h1>SaaS Hub Dashboard</h1>
+                    <div class="user-info">Welcome back, <span id="userName"></span></div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Stats Overview -->
+            <div id="statsContainer" class="stats-grid">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <!-- Main Content -->
+            <div class="section">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('seo')">SEO Analysis</button>
+                    <button class="tab" onclick="switchTab('email')">Email Marketing</button>
+                </div>
+
+                <!-- SEO Tab -->
+                <div id="seoTab" class="tab-content active">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="siteUrl">Website URL</label>
+                            <input type="url" id="siteUrl" placeholder="https://example.com">
+                        </div>
+                        <div style="display: flex; align-items: end; gap: 8px;">
+                            <button class="btn" onclick="addSite()" id="addSiteBtn">Add Site</button>
+                            <button class="btn btn-secondary" onclick="auditUrl()" id="auditUrlBtn">Quick Audit</button>
+                        </div>
+                    </div>
+
+                    <div id="sitesList" class="item-list">
+                        <!-- Sites will be loaded here -->
+                    </div>
+
+                    <div id="auditResults" class="hidden">
+                        <h3>SEO Audit Results</h3>
+                        <div id="auditScore"></div>
+                        <div id="auditRecommendations" class="recommendations"></div>
+                    </div>
+                </div>
+
+                <!-- Email Tab -->
+                <div id="emailTab" class="tab-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactName">Contact Name</label>
+                            <input type="text" id="contactName" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Contact Email</label>
+                            <input type="email" id="contactEmail" placeholder="john@example.com">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addContact()" id="addContactBtn">Add Contact</button>
+
+                    <h3 style="margin-top: 32px; margin-bottom: 16px;">Contacts</h3>
+                    <div id="contactsList" class="item-list">
+                        <!-- Contacts will be loaded here -->
+                    </div>
+
+                    <h3 style="margin-top: 32px; margin-bottom: 16px;">Create Campaign</h3>
+                    <div class="form-group">
+                        <label for="campaignTitle">Campaign Title</label>
+                        <input type="text" id="campaignTitle" placeholder="Newsletter #1">
+                    </div>
+                    <div class="form-group">
+                        <label for="campaignContent">Email Content</label>
+                        <textarea id="campaignContent" rows="4" placeholder="Hello {{name}}, welcome to our newsletter!"></textarea>
+                    </div>
+                    <button class="btn" onclick="createCampaign()" id="createCampaignBtn">Create Campaign</button>
+
+                    <h3 style="margin-top: 32px; margin-bottom: 16px;">Campaigns</h3>
+                    <div id="campaignsList" class="item-list">
+                        <!-- Campaigns will be loaded here -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Configuration
+        // Global state
+        let currentUser = null;
+        let currentTab = 'seo';
         const API_BASE = '/api';
-        
-        // DOM Elements
-        const signupForm = document.getElementById('signupForm');
-        const signupBtn = document.getElementById('signupBtn');
-        const signupSpinner = document.getElementById('signupSpinner');
-        const messageContainer = document.getElementById('messageContainer');
-        const loginLink = document.getElementById('loginLink');
-        
-        const nameInput = document.getElementById('signupName');
-        const emailInput = document.getElementById('signupEmail');
-        const passwordInput = document.getElementById('signupPassword');
-        
-        const nameError = document.getElementById('nameError');
-        const emailError = document.getElementById('emailError');
-        const passwordError = document.getElementById('passwordError');
-        
-        // Password requirement elements
-        const lengthReq = document.getElementById('lengthReq');
-        const letterReq = document.getElementById('letterReq');
-        const numberReq = document.getElementById('numberReq');
 
         // Utility functions
         function showMessage(message, type = 'info') {
-            messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
             setTimeout(() => {
-                if (messageContainer.innerHTML.includes(message)) {
-                    messageContainer.innerHTML = '';
+                if (container.innerHTML.includes(message)) {
+                    container.innerHTML = '';
                 }
             }, 5000);
         }
 
         function clearMessage() {
-            messageContainer.innerHTML = '';
+            document.getElementById('messageContainer').innerHTML = '';
         }
 
-        function showSpinner() {
-            signupSpinner.classList.remove('hidden');
+        function showSpinner(spinnerId) {
+            document.getElementById(spinnerId).classList.remove('hidden');
         }
 
-        function hideSpinner() {
-            signupSpinner.classList.add('hidden');
+        function hideSpinner(spinnerId) {
+            document.getElementById(spinnerId).classList.add('hidden');
         }
 
-        function disableButton() {
-            signupBtn.disabled = true;
+        function disableButton(buttonId) {
+            const btn = document.getElementById(buttonId);
+            btn.disabled = true;
         }
 
-        function enableButton() {
-            signupBtn.disabled = false;
+        function enableButton(buttonId) {
+            const btn = document.getElementById(buttonId);
+            btn.disabled = false;
         }
 
-        function showFieldError(errorElement, message) {
-            errorElement.textContent = message;
-            errorElement.classList.remove('hidden');
-        }
-
-        function hideFieldError(errorElement) {
-            errorElement.classList.add('hidden');
-        }
-
-        function clearAllErrors() {
-            hideFieldError(nameError);
-            hideFieldError(emailError);
-            hideFieldError(passwordError);
-            
-            nameInput.classList.remove('error');
-            emailInput.classList.remove('error');
-            passwordInput.classList.remove('error');
-        }
-
-        // Validation functions
-        function validateName(name) {
-            if (!name || name.trim().length < 2) {
-                return 'Name must be at least 2 characters long';
-            }
-            return null;
-        }
-
-        function validateEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email) {
-                return 'Email is required';
-            }
-            if (!emailRegex.test(email)) {
-                return 'Please enter a valid email address';
-            }
-            return null;
-        }
-
-        function validatePassword(password) {
-            if (!password) {
-                return 'Password is required';
-            }
-            if (password.length < 6) {
-                return 'Password must be at least 6 characters long';
-            }
-            if (!/[a-zA-Z]/.test(password)) {
-                return 'Password must contain at least one letter';
-            }
-            if (!/[0-9]/.test(password)) {
-                return 'Password must contain at least one number';
-            }
-            return null;
-        }
-
-        function updatePasswordRequirements(password) {
-            // Length requirement
-            if (password.length >= 6) {
-                lengthReq.classList.remove('invalid');
-                lengthReq.classList.add('valid');
-            } else {
-                lengthReq.classList.remove('valid');
-                lengthReq.classList.add('invalid');
-            }
-
-            // Letter requirement
-            if (/[a-zA-Z]/.test(password)) {
-                letterReq.classList.remove('invalid');
-                letterReq.classList.add('valid');
-            } else {
-                letterReq.classList.remove('valid');
-                letterReq.classList.add('invalid');
-            }
-
-            // Number requirement
-            if (/[0-9]/.test(password)) {
-                numberReq.classList.remove('invalid');
-                numberReq.classList.add('valid');
-            } else {
-                numberReq.classList.remove('valid');
-                numberReq.classList.add('invalid');
-            }
-        }
-
-        function validateForm() {
-            let isValid = true;
-            clearAllErrors();
-
-            // Validate name
-            const nameValidation = validateName(nameInput.value.trim());
-            if (nameValidation) {
-                showFieldError(nameError, nameValidation);
-                nameInput.classList.add('error');
-                isValid = false;
-            }
-
-            // Validate email
-            const emailValidation = validateEmail(emailInput.value.trim());
-            if (emailValidation) {
-                showFieldError(emailError, emailValidation);
-                emailInput.classList.add('error');
-                isValid = false;
-            }
-
-            // Validate password
-            const passwordValidation = validatePassword(passwordInput.value);
-            if (passwordValidation) {
-                showFieldError(passwordError, passwordValidation);
-                passwordInput.classList.add('error');
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        // API function
         async function makeRequest(url, options = {}) {
+            const token = localStorage.getItem('token');
             const defaultHeaders = {
                 'Content-Type': 'application/json',
             };
+
+            if (token) {
+                defaultHeaders['Authorization'] = `Bearer ${token}`;
+            }
 
             const config = {
                 headers: {
@@ -415,6 +639,7 @@
                 const response = await fetch(url, config);
                 console.log(`Response from ${url}:`, response.status, response.statusText);
                 
+                // Handle non-JSON responses
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     const data = await response.json();
@@ -422,8 +647,8 @@
                     return { response, data };
                 } else {
                     const text = await response.text();
-                    console.log('Non-JSON response:', text);
-                    return { response, data: { error: text || 'Invalid server response' } };
+                    console.log('Response text:', text);
+                    return { response, data: { error: text || 'Non-JSON response' } };
                 }
             } catch (error) {
                 console.error(`Request failed for ${url}:`, error);
@@ -431,25 +656,87 @@
             }
         }
 
-        // Main signup handler
-        async function handleSignup(e) {
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        function getScoreClass(score) {
+            if (score >= 80) return 'excellent';
+            if (score >= 60) return 'good';
+            if (score >= 40) return 'average';
+            return 'poor';
+        }
+
+        // Authentication functions
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('signupForm').classList.add('hidden');
+            clearMessage();
+        }
+
+        function showSignup() {
+            document.getElementById('signupForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            clearMessage();
+        }
+
+        async function handleLogin(e) {
             e.preventDefault();
             
-            console.log('Signup form submitted');
-            
-            if (!validateForm()) {
-                console.log('Form validation failed');
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showMessage('Please enter both email and password', 'error');
                 return;
             }
 
-            const name = nameInput.value.trim();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
+            disableButton('loginBtn');
+            showSpinner('loginSpinner');
+            clearMessage();
 
-            console.log('Signup data:', { name, email, password: '***' });
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/login`, {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
 
-            disableButton();
-            showSpinner();
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    currentUser = data.user;
+                    showDashboard();
+                    showMessage('Login successful!', 'success');
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Network error. Please check your connection and try again.', 'error');
+            } finally {
+                enableButton('loginBtn');
+                hideSpinner('loginSpinner');
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+
+            if (!name || !email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            disableButton('signupBtn');
+            showSpinner('signupSpinner');
             clearMessage();
 
             try {
@@ -459,146 +746,606 @@
                 });
 
                 if (response.ok) {
-                    console.log('Signup successful:', data);
-                    
-                    // Store the token
                     localStorage.setItem('token', data.token);
-                    
-                    showMessage('Account created successfully! Redirecting...', 'success');
-                    
-                    // Reset form
-                    signupForm.reset();
-                    updatePasswordRequirements('');
-                    
-                    // Redirect to dashboard after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
-                    
+                    currentUser = data.user;
+                    showDashboard();
+                    showMessage('Account created successfully!', 'success');
                 } else {
-                    console.log('Signup failed:', data);
-                    
-                    // Handle specific error cases
-                    if (data.error && data.error.includes('email')) {
-                        showFieldError(emailError, data.error);
-                        emailInput.classList.add('error');
-                    } else if (data.error && data.error.includes('password')) {
-                        showFieldError(passwordError, data.error);
-                        passwordInput.classList.add('error');
-                    } else {
-                        showMessage(data.error || 'Signup failed. Please try again.', 'error');
-                    }
+                    showMessage(data.error || 'Signup failed', 'error');
                 }
             } catch (error) {
                 console.error('Signup error:', error);
-                
-                if (error.message.includes('Failed to fetch')) {
-                    showMessage('Unable to connect to server. Please check your internet connection.', 'error');
-                } else {
-                    showMessage('Network error. Please try again.', 'error');
-                }
+                showMessage('Network error. Please check your connection and try again.', 'error');
             } finally {
-                enableButton();
-                hideSpinner();
+                enableButton('signupBtn');
+                hideSpinner('signupSpinner');
             }
         }
 
-        // Event listeners
-        function setupEventListeners() {
-            // Form submission
-            signupForm.addEventListener('submit', handleSignup);
-
-            // Real-time password validation
-            passwordInput.addEventListener('input', function() {
-                updatePasswordRequirements(this.value);
-            });
-
-            // Login link
-            loginLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.location.href = '/';
-            });
-
-            // Real-time field validation (optional)
-            nameInput.addEventListener('blur', function() {
-                const validation = validateName(this.value.trim());
-                if (validation) {
-                    showFieldError(nameError, validation);
-                    this.classList.add('error');
-                } else {
-                    hideFieldError(nameError);
-                    this.classList.remove('error');
-                }
-            });
-
-            emailInput.addEventListener('blur', function() {
-                const validation = validateEmail(this.value.trim());
-                if (validation) {
-                    showFieldError(emailError, validation);
-                    this.classList.add('error');
-                } else {
-                    hideFieldError(emailError);
-                    this.classList.remove('error');
-                }
-            });
-
-            passwordInput.addEventListener('blur', function() {
-                const validation = validatePassword(this.value);
-                if (validation) {
-                    showFieldError(passwordError, validation);
-                    this.classList.add('error');
-                } else {
-                    hideFieldError(passwordError);
-                    this.classList.remove('error');
-                }
-            });
-
-            console.log('Event listeners set up');
+        function logout() {
+            localStorage.removeItem('token');
+            currentUser = null;
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            
+            // Reset forms
+            document.getElementById('loginFormElement').reset();
+            document.getElementById('signupFormElement').reset();
+            
+            showMessage('Logged out successfully', 'success');
+            showLogin();
         }
 
-        // Initialize the page
-        function init() {
-            console.log('Initializing signup page...');
+        // Dashboard functions
+        function showDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
             
-            // Check if user is already logged in
+            if (currentUser && currentUser.name) {
+                document.getElementById('userName').textContent = currentUser.name;
+            }
+            
+            loadDashboardData();
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load data in parallel with error handling for each
+                const loadPromises = [
+                    loadStats(),
+                    loadSites(),
+                    loadContacts(),
+                    loadCampaigns()
+                ];
+
+                await Promise.allSettled(loadPromises);
+            } catch (error) {
+                console.error('Dashboard loading error:', error);
+                showMessage('Some data failed to load. Please refresh the page.', 'error');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/dashboard`);
+                
+                if (response.ok && data.stats) {
+                    displayStats(data.stats);
+                } else {
+                    // Fallback stats
+                    displayStats({
+                        sites: 0,
+                        contacts: 0,
+                        campaigns: 0,
+                        limits: { sites: 3, contacts: 50, campaigns: 3 }
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+                displayStats({
+                    sites: 0,
+                    contacts: 0,
+                    campaigns: 0,
+                    limits: { sites: 3, contacts: 50, campaigns: 3 }
+                });
+            }
+        }
+
+        function displayStats(stats) {
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.sites}</div>
+                    <div class="stat-label">Websites</div>
+                    <div class="stat-limit">Limit: ${stats.limits.sites}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.contacts}</div>
+                    <div class="stat-label">Contacts</div>
+                    <div class="stat-limit">Limit: ${stats.limits.contacts}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.campaigns}</div>
+                    <div class="stat-label">Campaigns</div>
+                    <div class="stat-limit">Limit: ${stats.limits.campaigns}</div>
+                </div>
+            `;
+        }
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab:nth-child(${tab === 'seo' ? '1' : '2'})`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(`${tab}Tab`).classList.add('active');
+            
+            currentTab = tab;
+        }
+
+        // SEO functions
+        async function loadSites() {
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/sites`);
+                
+                if (response.ok) {
+                    displaySites(data);
+                } else {
+                    console.error('Failed to load sites:', data.error);
+                    displaySites([]);
+                }
+            } catch (error) {
+                console.error('Failed to load sites:', error);
+                displaySites([]);
+            }
+        }
+
+        function displaySites(sites) {
+            const container = document.getElementById('sitesList');
+            if (!sites || sites.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No sites added yet. Add your first site above!</p>';
+                return;
+            }
+
+            container.innerHTML = sites.map(site => `
+                <div class="item">
+                    <div class="item-info">
+                        <h4>${site.url}</h4>
+                        <p>Last audit: ${formatDate(site.last_audit)}</p>
+                    </div>
+                    <div class="item-actions">
+                        <span class="score ${getScoreClass(site.score)}">${site.score}</span>
+                        <button class="btn btn-small" onclick="auditSite(${site.id}, '${site.url}')">Audit</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteSite(${site.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function addSite() {
+            const url = document.getElementById('siteUrl').value.trim();
+            if (!url) {
+                showMessage('Please enter a website URL', 'error');
+                return;
+            }
+
+            disableButton('addSiteBtn');
+
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/sites`, {
+                    method: 'POST',
+                    body: JSON.stringify({ url })
+                });
+
+                if (response.ok) {
+                    document.getElementById('siteUrl').value = '';
+                    showMessage('Site added successfully!', 'success');
+                    await loadDashboardData();
+                } else {
+                    showMessage(data.error || 'Failed to add site', 'error');
+                }
+            } catch (error) {
+                console.error('Add site error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                enableButton('addSiteBtn');
+            }
+        }
+
+        async function auditSite(siteId, url) {
+            showAuditLoading();
+            
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/audit`, {
+                    method: 'POST',
+                    body: JSON.stringify({ siteId })
+                });
+
+                showAuditResults(data, url);
+                if (response.ok) {
+                    await loadDashboardData(); // Refresh to update scores
+                }
+            } catch (error) {
+                console.error('Audit error:', error);
+                showMessage('Audit failed. Please try again.', 'error');
+                hideAuditResults();
+            }
+        }
+
+        async function auditUrl() {
+            const url = document.getElementById('siteUrl').value.trim();
+            if (!url) {
+                showMessage('Please enter a website URL to audit', 'error');
+                return;
+            }
+
+            disableButton('auditUrlBtn');
+            showAuditLoading();
+            
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/audit`, {
+                    method: 'POST',
+                    body: JSON.stringify({ url })
+                });
+
+                showAuditResults(data, url);
+            } catch (error) {
+                console.error('Audit error:', error);
+                showMessage('Audit failed. Please try again.', 'error');
+                hideAuditResults();
+            } finally {
+                enableButton('auditUrlBtn');
+            }
+        }
+
+        function showAuditLoading() {
+            const container = document.getElementById('auditResults');
+            container.classList.remove('hidden');
+            container.innerHTML = '<div class="loading">Running SEO audit...</div>';
+        }
+
+        function showAuditResults(data, url) {
+            const container = document.getElementById('auditResults');
+            container.classList.remove('hidden');
+            
+            const score = data.score || 0;
+            const scoreClass = getScoreClass(score);
+            let recommendationsHtml = '';
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                recommendationsHtml = data.recommendations.map(rec => 
+                    `<div class="recommendation ${rec.type}">${rec.text}</div>`
+                ).join('');
+            } else if (data.error) {
+                recommendationsHtml = `<div class="recommendation critical">${data.error}</div>`;
+            }
+
+            container.innerHTML = `
+                <h3>SEO Audit Results for ${url}</h3>
+                <div style="display: flex; align-items: center; margin: 16px 0;">
+                    <span>Overall SEO Score:</span>
+                    <span class="score ${scoreClass}">${score}/100</span>
+                </div>
+                ${recommendationsHtml ? `<div class="recommendations">${recommendationsHtml}</div>` : ''}
+            `;
+        }
+
+        function hideAuditResults() {
+            document.getElementById('auditResults').classList.add('hidden');
+        }
+
+        async function deleteSite(siteId) {
+            if (!confirm('Are you sure you want to delete this site?')) return;
+
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/sites/${siteId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Site deleted successfully!', 'success');
+                    await loadDashboardData();
+                } else {
+                    showMessage(data.error || 'Failed to delete site', 'error');
+                }
+            } catch (error) {
+                console.error('Delete site error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Email Marketing functions
+        async function loadContacts() {
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/contacts`);
+                
+                if (response.ok) {
+                    displayContacts(data);
+                } else {
+                    console.error('Failed to load contacts:', data.error);
+                    displayContacts([]);
+                }
+            } catch (error) {
+                console.error('Failed to load contacts:', error);
+                displayContacts([]);
+            }
+        }
+
+        function displayContacts(contacts) {
+            const container = document.getElementById('contactsList');
+            if (!contacts || contacts.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No contacts added yet. Add your first contact above!</p>';
+                return;
+            }
+
+            container.innerHTML = contacts.map(contact => `
+                <div class="item">
+                    <div class="item-info">
+                        <h4>${contact.name}</h4>
+                        <p>${contact.email}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-small btn-danger" onclick="deleteContact(${contact.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function addContact() {
+            const name = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            
+            if (!name || !email) {
+                showMessage('Please enter both name and email', 'error');
+                return;
+            }
+
+            disableButton('addContactBtn');
+
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/contacts`, {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email })
+                });
+
+                if (response.ok) {
+                    document.getElementById('contactName').value = '';
+                    document.getElementById('contactEmail').value = '';
+                    showMessage('Contact added successfully!', 'success');
+                    await loadDashboardData();
+                } else {
+                    showMessage(data.error || 'Failed to add contact', 'error');
+                }
+            } catch (error) {
+                console.error('Add contact error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                enableButton('addContactBtn');
+            }
+        }
+
+        async function deleteContact(contactId) {
+            if (!confirm('Are you sure you want to delete this contact?')) return;
+
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/contacts/${contactId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Contact deleted successfully!', 'success');
+                    await loadDashboardData();
+                } else {
+                    showMessage(data.error || 'Failed to delete contact', 'error');
+                }
+            } catch (error) {
+                console.error('Delete contact error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        async function loadCampaigns() {
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/campaigns`);
+                
+                if (response.ok) {
+                    displayCampaigns(data);
+                } else {
+                    console.error('Failed to load campaigns:', data.error);
+                    displayCampaigns([]);
+                }
+            } catch (error) {
+                console.error('Failed to load campaigns:', error);
+                displayCampaigns([]);
+            }
+        }
+
+        function displayCampaigns(campaigns) {
+            const container = document.getElementById('campaignsList');
+            if (!campaigns || campaigns.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No campaigns created yet. Create your first campaign above!</p>';
+                return;
+            }
+
+            container.innerHTML = campaigns.map(campaign => {
+                const stats = campaign.CampaignStat || {};
+                return `
+                    <div class="item">
+                        <div class="item-info">
+                            <h4>${campaign.title}</h4>
+                            <p>Status: ${campaign.status} ${campaign.sent_at ? `• Sent: ${formatDate(campaign.sent_at)}` : ''}</p>
+                            ${campaign.status === 'sent' ? `
+                                <div class="campaign-stats">
+                                    <div class="mini-stat">
+                                        <div class="mini-stat-number">${stats.opens || 0}</div>
+                                        <div class="mini-stat-label">Opens</div>
+                                    </div>
+                                    <div class="mini-stat">
+                                        <div class="mini-stat-number">${stats.clicks || 0}</div>
+                                        <div class="mini-stat-label">Clicks</div>
+                                    </div>
+                                    <div class="mini-stat">
+                                        <div class="mini-stat-number">${stats.unsubscribes || 0}</div>
+                                        <div class="mini-stat-label">Unsubscribes</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="item-actions">
+                            ${campaign.status === 'draft' ? 
+                                `<button class="btn btn-small send-campaign-btn" data-campaign-id="${campaign.id}">Send</button>` : 
+                                ''
+                            }
+                            <button class="btn btn-small btn-danger delete-campaign-btn" data-campaign-id="${campaign.id}">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add event listeners for campaign buttons
+            container.querySelectorAll('.send-campaign-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const campaignId = this.getAttribute('data-campaign-id');
+                    sendCampaign(campaignId);
+                });
+            });
+
+            container.querySelectorAll('.delete-campaign-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const campaignId = this.getAttribute('data-campaign-id');
+                    deleteCampaign(campaignId);
+                });
+            });
+        }
+
+        async function createCampaign() {
+            const title = document.getElementById('campaignTitle').value.trim();
+            const content = document.getElementById('campaignContent').value.trim();
+            
+            if (!title || !content) {
+                showMessage('Please enter both title and content', 'error');
+                return;
+            }
+
+            disableButton('createCampaignBtn');
+
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/campaigns`, {
+                    method: 'POST',
+                    body: JSON.stringify({ title, content })
+                });
+
+                if (response.ok) {
+                    document.getElementById('campaignTitle').value = '';
+                    document.getElementById('campaignContent').value = '';
+                    showMessage('Campaign created successfully!', 'success');
+                    await loadDashboardData();
+                } else {
+                    showMessage(data.error || 'Failed to create campaign', 'error');
+                }
+            } catch (error) {
+                console.error('Create campaign error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                enableButton('createCampaignBtn');
+            }
+        }
+
+        async function sendCampaign(campaignId) {
+            if (!confirm('Are you sure you want to send this campaign to all contacts?')) return;
+
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/campaigns/${campaignId}/send`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const results = data.results || { sent: 0, failed: 0 };
+                    showMessage(`Campaign sent! Results: ${results.sent} sent, ${results.failed} failed`, 
+                               results.failed > 0 ? 'error' : 'success');
+                    await loadDashboardData();
+                } else {
+                    showMessage(data.error || 'Failed to send campaign', 'error');
+                }
+            } catch (error) {
+                console.error('Send campaign error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        async function deleteCampaign(campaignId) {
+            if (!confirm('Are you sure you want to delete this campaign?')) return;
+
+            try {
+                const { response, data } = await makeRequest(`${API_BASE}/campaigns/${campaignId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Campaign deleted successfully!', 'success');
+                    await loadDashboardData();
+                } else {
+                    showMessage(data.error || 'Failed to delete campaign', 'error');
+                }
+            } catch (error) {
+                console.error('Delete campaign error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Initialize app
+        function initApp() {
+            console.log('Initializing app...');
+            
             const token = localStorage.getItem('token');
             if (token) {
                 try {
+                    // Decode JWT token to check validity
                     const payload = JSON.parse(atob(token.split('.')[1]));
-                    if (payload.exp > Date.now() / 1000) {
-                        console.log('User already logged in, redirecting...');
-                        window.location.href = '/';
+                    
+                    // Check if token is expired
+                    if (payload.exp && payload.exp > Date.now() / 1000) {
+                        // Token is valid, try to get user info
+                        currentUser = { 
+                            id: payload.id, 
+                            email: payload.email,
+                            name: payload.name || 'User'
+                        };
+                        
+                        console.log('Valid token found, showing dashboard');
+                        showDashboard();
                         return;
                     } else {
+                        console.log('Token expired, removing');
                         localStorage.removeItem('token');
                     }
                 } catch (error) {
+                    console.log('Invalid token, removing:', error);
                     localStorage.removeItem('token');
                 }
             }
-
-            setupEventListeners();
             
-            // Focus on first input
-            nameInput.focus();
-            
-            console.log('Signup page initialized');
+            // Show auth section if no valid token
+            console.log('No valid token, showing auth');
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            showLogin();
         }
 
-        // Wait for DOM to be ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-
-        // Global error handler
-        window.addEventListener('unhandledrejection', function(event) {
-            console.error('Unhandled promise rejection:', event.reason);
-            showMessage('An unexpected error occurred. Please try again.', 'error');
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up event listeners...');
+            
+            // Form event listeners
+            const loginForm = document.getElementById('loginFormElement');
+            const signupForm = document.getElementById('signupFormElement');
+            
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+            
+            if (signupForm) {
+                signupForm.addEventListener('submit', handleSignup);
+            }
+            
+            // Initialize the app
+            initApp();
         });
 
-        console.log('Signup page script loaded');
+        // Handle API errors globally
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            
+            // Check if it's a network error
+            if (event.reason && event.reason.message && event.reason.message.includes('Failed to fetch')) {
+                showMessage('Network connection error. Please check your internet connection.', 'error');
+            }
+        });
+
+        // Add some debug info
+        console.log('SaaS Hub app script loaded');
+        console.log('API Base URL:', API_BASE);
     </script>
 </body>
 </html>
