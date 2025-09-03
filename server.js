@@ -30,7 +30,7 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Database Setup
+// Database Setup with better error handling
 const sequelize = new Sequelize(DATABASE_URL, {
   dialect: 'mysql',
   logging: false,
@@ -39,6 +39,10 @@ const sequelize = new Sequelize(DATABASE_URL, {
     min: 0,
     acquire: 30000,
     idle: 10000
+  },
+  dialectOptions: {
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci'
   }
 });
 
@@ -49,6 +53,9 @@ const User = sequelize.define('User', {
   email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
   password_hash: { type: DataTypes.STRING(255), allowNull: false },
   created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  tableName: 'users', // Force lowercase table name
+  timestamps: false
 });
 
 const Site = sequelize.define('Site', {
@@ -57,6 +64,9 @@ const Site = sequelize.define('Site', {
   url: { type: DataTypes.STRING(500), allowNull: false },
   score: { type: DataTypes.INTEGER, defaultValue: 0 },
   last_audit: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  tableName: 'sites',
+  timestamps: false
 });
 
 const SEOAudit = sequelize.define('SEOAudit', {
@@ -65,6 +75,9 @@ const SEOAudit = sequelize.define('SEOAudit', {
   score: { type: DataTypes.INTEGER, allowNull: false },
   recommendations: { type: DataTypes.TEXT, allowNull: false },
   created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  tableName: 'seo_audits',
+  timestamps: false
 });
 
 const Contact = sequelize.define('Contact', {
@@ -73,6 +86,9 @@ const Contact = sequelize.define('Contact', {
   email: { type: DataTypes.STRING(255), allowNull: false },
   name: { type: DataTypes.STRING(100), allowNull: false },
   created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  tableName: 'contacts',
+  timestamps: false
 });
 
 const Campaign = sequelize.define('Campaign', {
@@ -82,6 +98,9 @@ const Campaign = sequelize.define('Campaign', {
   content: { type: DataTypes.TEXT, allowNull: false },
   status: { type: DataTypes.ENUM('draft', 'sent', 'active'), defaultValue: 'draft' },
   sent_at: { type: DataTypes.DATE }
+}, {
+  tableName: 'campaigns',
+  timestamps: false
 });
 
 const CampaignStats = sequelize.define('CampaignStats', {
@@ -90,6 +109,9 @@ const CampaignStats = sequelize.define('CampaignStats', {
   opens: { type: DataTypes.INTEGER, defaultValue: 0 },
   clicks: { type: DataTypes.INTEGER, defaultValue: 0 },
   unsubscribes: { type: DataTypes.INTEGER, defaultValue: 0 }
+}, {
+  tableName: 'campaign_stats',
+  timestamps: false
 });
 
 // Relations
@@ -963,18 +985,87 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Database initialization and server startup
-async function startServer() {
+// Database initialization function with better error handling
+async function initializeDatabase() {
   try {
-    // Test database connection
+    console.log('🔄 Testing database connection...');
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
 
-    // Sync database models (create tables if they don't exist)
-    await sequelize.sync({ alter: true });
-    console.log('✅ Database models synchronized.');
+    console.log('🔄 Checking database structure...');
+    
+    // Try to sync with alter: false first to avoid modifying existing tables
+    try {
+      await sequelize.sync({ alter: false });
+      console.log('✅ Database structure is up to date.');
+    } catch (syncError) {
+      console.log('⚠️ Database structure needs updates, attempting safe sync...');
+      
+      // If sync fails, try with alter: true but with better error handling
+      try {
+        await sequelize.sync({ alter: true });
+        console.log('✅ Database structure updated successfully.');
+      } catch (alterError) {
+        console.error('❌ Database sync failed:', alterError.message);
+        
+        // If alter fails due to table full error, suggest solutions
+        if (alterError.message.includes('table') && alterError.message.includes('full')) {
+          console.error('\n💡 SOLUTION SUGGESTIONS:');
+          console.error('1. Check your database storage quota');
+          console.error('2. Clean up old data if possible');
+          console.error('3. Contact your hosting provider to increase storage');
+          console.error('4. Try using force: true (WARNING: This will drop all tables!)');
+          console.error('\nTo force recreate tables (DANGER - ALL DATA WILL BE LOST):');
+          console.error('Set environment variable: FORCE_DB_SYNC=true');
+          
+          // Check if force sync is requested
+          if (process.env.FORCE_DB_SYNC === 'true') {
+            console.log('⚠️ FORCE SYNC REQUESTED - DROPPING ALL TABLES...');
+            await sequelize.sync({ force: true });
+            console.log('✅ Database tables recreated (all data lost).');
+          } else {
+            throw alterError;
+          }
+        } else {
+          throw alterError;
+        }
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error.message);
+    
+    // Provide specific error handling for common issues
+    if (error.name === 'SequelizeConnectionError') {
+      console.error('\n💡 Database connection failed. Check:');
+      console.error('- DATABASE_URL environment variable');
+      console.error('- MySQL server is running');
+      console.error('- Credentials are correct');
+      console.error('- Network connectivity');
+    } else if (error.name === 'SequelizeDatabaseError' && error.message.includes('full')) {
+      console.error('\n💡 Database storage full. Solutions:');
+      console.error('- Free up disk space on your database server');
+      console.error('- Increase storage quota');
+      console.error('- Clean up old/unused data');
+      console.error('- Contact your hosting provider');
+    }
+    
+    return false;
+  }
+}
 
-    // Start server
+// Database initialization and server startup
+async function startServer() {
+  try {
+    // Initialize database with better error handling
+    const dbInitialized = await initializeDatabase();
+    
+    if (!dbInitialized) {
+      console.log('⚠️ Starting server without database (limited functionality)...');
+    }
+
+    // Start server regardless of database status
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📊 Dashboard: http://localhost:${PORT}`);
@@ -982,9 +1073,14 @@ async function startServer() {
       
       // Log configuration status
       console.log('\n📋 Configuration Status:');
-      console.log('  - Database:', DATABASE_URL ? '✅ Configured' : '❌ Not configured');
+      console.log('  - Database:', dbInitialized ? '✅ Connected' : '❌ Disconnected');
       console.log('  - SMTP:', process.env.SMTP_USER ? '✅ Configured' : '❌ Not configured');
       console.log('  - JWT Secret:', JWT_SECRET !== 'your-super-secret-jwt-key-change-in-production' ? '✅ Custom' : '⚠️ Default');
+      
+      if (!dbInitialized) {
+        console.log('\n⚠️ WARNING: Database not available - some features will not work');
+        console.log('   SEO audits will still function independently');
+      }
     });
   } catch (error) {
     console.error('❌ Unable to start server:', error);
@@ -995,14 +1091,33 @@ async function startServer() {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('🔄 SIGTERM received, shutting down gracefully...');
-  await sequelize.close();
+  try {
+    await sequelize.close();
+  } catch (error) {
+    console.error('Error closing database connection:', error.message);
+  }
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('\n🔄 SIGINT received, shutting down gracefully...');
-  await sequelize.close();
+  try {
+    await sequelize.close();
+  } catch (error) {
+    console.error('Error closing database connection:', error.message);
+  }
   process.exit(0);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
 });
 
 // Start the server
