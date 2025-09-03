@@ -92,12 +92,12 @@ const CampaignStats = sequelize.define('CampaignStats', {
   unsubscribes: { type: DataTypes.INTEGER, defaultValue: 0 }
 });
 
-// Relations (define without foreign key constraints to avoid issues)
-User.hasMany(Site, { foreignKey: 'user_id', onDelete: 'CASCADE' });
-User.hasMany(Contact, { foreignKey: 'user_id', onDelete: 'CASCADE' });
-User.hasMany(Campaign, { foreignKey: 'user_id', onDelete: 'CASCADE' });
-Site.hasMany(SEOAudit, { foreignKey: 'site_id', onDelete: 'CASCADE' });
-Campaign.hasOne(CampaignStats, { foreignKey: 'campaign_id', onDelete: 'CASCADE' });
+// Relations
+User.hasMany(Site, { foreignKey: 'user_id' });
+User.hasMany(Contact, { foreignKey: 'user_id' });
+User.hasMany(Campaign, { foreignKey: 'user_id' });
+Site.hasMany(SEOAudit, { foreignKey: 'site_id' });
+Campaign.hasOne(CampaignStats, { foreignKey: 'campaign_id' });
 
 // SMTP Configuration
 const createTransporter = () => {
@@ -494,7 +494,11 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Find user
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email } }).catch(err => {
+      console.log('Database query error:', err.message);
+      return null;
+    });
+    
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
