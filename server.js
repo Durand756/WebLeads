@@ -92,12 +92,12 @@ const CampaignStats = sequelize.define('CampaignStats', {
   unsubscribes: { type: DataTypes.INTEGER, defaultValue: 0 }
 });
 
-// Relations
-User.hasMany(Site, { foreignKey: 'user_id' });
-User.hasMany(Contact, { foreignKey: 'user_id' });
-User.hasMany(Campaign, { foreignKey: 'user_id' });
-Site.hasMany(SEOAudit, { foreignKey: 'site_id' });
-Campaign.hasOne(CampaignStats, { foreignKey: 'campaign_id' });
+// Relations (define without foreign key constraints to avoid issues)
+User.hasMany(Site, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+User.hasMany(Contact, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+User.hasMany(Campaign, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+Site.hasMany(SEOAudit, { foreignKey: 'site_id', onDelete: 'CASCADE' });
+Campaign.hasOne(CampaignStats, { foreignKey: 'campaign_id', onDelete: 'CASCADE' });
 
 // SMTP Configuration
 const createTransporter = () => {
