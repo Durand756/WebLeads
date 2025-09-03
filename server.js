@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 // Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
-const DATABASE_URL = process.env.DATABASE_URL || 'mysql://user:password@localhost:3306/saas_db';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/database';
 
 // Middleware
 app.use(helmet());
@@ -30,96 +30,304 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Database Setup with better error handling
+// Database Setup for PostgreSQL with SSL
 const sequelize = new Sequelize(DATABASE_URL, {
-  dialect: 'mysql',
+  dialect: 'postgres',
+  dialectOptions: {
+    ssl: process.env.NODE_ENV === 'production' ? {
+      require: true,
+      rejectUnauthorized: false
+    } : false
+  },
   logging: false,
   pool: {
     max: 5,
     min: 0,
     acquire: 30000,
     idle: 10000
-  },
-  dialectOptions: {
-    charset: 'utf8mb4',
-    collate: 'utf8mb4_unicode_ci'
   }
 });
 
-// Models
+// Models with PostgreSQL-optimized data types
 const User = sequelize.define('User', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  name: { type: DataTypes.STRING(100), allowNull: false },
-  email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
-  password_hash: { type: DataTypes.STRING(255), allowNull: false },
-  created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  name: { 
+    type: DataTypes.STRING(100), 
+    allowNull: false 
+  },
+  email: { 
+    type: DataTypes.STRING(255), 
+    allowNull: false, 
+    unique: true,
+    validate: {
+      isEmail: true
+    }
+  },
+  password_hash: { 
+    type: DataTypes.STRING(255), 
+    allowNull: false 
+  },
+  created_at: { 
+    type: DataTypes.DATE, 
+    defaultValue: DataTypes.NOW 
+  }
 }, {
-  tableName: 'users', // Force lowercase table name
-  timestamps: false
+  tableName: 'users',
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['email']
+    }
+  ]
 });
 
 const Site = sequelize.define('Site', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  user_id: { type: DataTypes.INTEGER, allowNull: false },
-  url: { type: DataTypes.STRING(500), allowNull: false },
-  score: { type: DataTypes.INTEGER, defaultValue: 0 },
-  last_audit: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  user_id: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  url: { 
+    type: DataTypes.STRING(500), 
+    allowNull: false 
+  },
+  score: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 0 
+  },
+  last_audit: { 
+    type: DataTypes.DATE, 
+    defaultValue: DataTypes.NOW 
+  }
 }, {
   tableName: 'sites',
-  timestamps: false
+  timestamps: false,
+  indexes: [
+    {
+      fields: ['user_id']
+    }
+  ]
 });
 
 const SEOAudit = sequelize.define('SEOAudit', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  site_id: { type: DataTypes.INTEGER, allowNull: false },
-  score: { type: DataTypes.INTEGER, allowNull: false },
-  recommendations: { type: DataTypes.TEXT, allowNull: false },
-  created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  site_id: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: {
+      model: Site,
+      key: 'id'
+    }
+  },
+  score: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false 
+  },
+  recommendations: { 
+    type: DataTypes.JSONB, // PostgreSQL JSONB for better performance
+    allowNull: false 
+  },
+  created_at: { 
+    type: DataTypes.DATE, 
+    defaultValue: DataTypes.NOW 
+  }
 }, {
   tableName: 'seo_audits',
-  timestamps: false
+  timestamps: false,
+  indexes: [
+    {
+      fields: ['site_id']
+    },
+    {
+      fields: ['created_at']
+    }
+  ]
 });
 
 const Contact = sequelize.define('Contact', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  user_id: { type: DataTypes.INTEGER, allowNull: false },
-  email: { type: DataTypes.STRING(255), allowNull: false },
-  name: { type: DataTypes.STRING(100), allowNull: false },
-  created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  user_id: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  email: { 
+    type: DataTypes.STRING(255), 
+    allowNull: false,
+    validate: {
+      isEmail: true
+    }
+  },
+  name: { 
+    type: DataTypes.STRING(100), 
+    allowNull: false 
+  },
+  created_at: { 
+    type: DataTypes.DATE, 
+    defaultValue: DataTypes.NOW 
+  }
 }, {
   tableName: 'contacts',
-  timestamps: false
+  timestamps: false,
+  indexes: [
+    {
+      fields: ['user_id']
+    },
+    {
+      unique: true,
+      fields: ['user_id', 'email']
+    }
+  ]
 });
 
 const Campaign = sequelize.define('Campaign', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  user_id: { type: DataTypes.INTEGER, allowNull: false },
-  title: { type: DataTypes.STRING(255), allowNull: false },
-  content: { type: DataTypes.TEXT, allowNull: false },
-  status: { type: DataTypes.ENUM('draft', 'sent', 'active'), defaultValue: 'draft' },
-  sent_at: { type: DataTypes.DATE }
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  user_id: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  title: { 
+    type: DataTypes.STRING(255), 
+    allowNull: false 
+  },
+  content: { 
+    type: DataTypes.TEXT, 
+    allowNull: false 
+  },
+  status: { 
+    type: DataTypes.ENUM('draft', 'sent', 'active'), 
+    defaultValue: 'draft' 
+  },
+  sent_at: { 
+    type: DataTypes.DATE,
+    allowNull: true 
+  },
+  created_at: { 
+    type: DataTypes.DATE, 
+    defaultValue: DataTypes.NOW 
+  }
 }, {
   tableName: 'campaigns',
-  timestamps: false
+  timestamps: false,
+  indexes: [
+    {
+      fields: ['user_id']
+    },
+    {
+      fields: ['status']
+    }
+  ]
 });
 
 const CampaignStats = sequelize.define('CampaignStats', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  campaign_id: { type: DataTypes.INTEGER, allowNull: false },
-  opens: { type: DataTypes.INTEGER, defaultValue: 0 },
-  clicks: { type: DataTypes.INTEGER, defaultValue: 0 },
-  unsubscribes: { type: DataTypes.INTEGER, defaultValue: 0 }
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  campaign_id: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: {
+      model: Campaign,
+      key: 'id'
+    }
+  },
+  opens: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 0 
+  },
+  clicks: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 0 
+  },
+  unsubscribes: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 0 
+  }
 }, {
   tableName: 'campaign_stats',
-  timestamps: false
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['campaign_id']
+    }
+  ]
 });
 
-// Relations
-User.hasMany(Site, { foreignKey: 'user_id' });
-User.hasMany(Contact, { foreignKey: 'user_id' });
-User.hasMany(Campaign, { foreignKey: 'user_id' });
-Site.hasMany(SEOAudit, { foreignKey: 'site_id' });
-Campaign.hasOne(CampaignStats, { foreignKey: 'campaign_id' });
+// Relations avec contraintes de clés étrangères
+User.hasMany(Site, { 
+  foreignKey: 'user_id',
+  onDelete: 'CASCADE'
+});
+Site.belongsTo(User, {
+  foreignKey: 'user_id'
+});
+
+User.hasMany(Contact, { 
+  foreignKey: 'user_id',
+  onDelete: 'CASCADE'
+});
+Contact.belongsTo(User, {
+  foreignKey: 'user_id'
+});
+
+User.hasMany(Campaign, { 
+  foreignKey: 'user_id',
+  onDelete: 'CASCADE'
+});
+Campaign.belongsTo(User, {
+  foreignKey: 'user_id'
+});
+
+Site.hasMany(SEOAudit, { 
+  foreignKey: 'site_id',
+  onDelete: 'CASCADE'
+});
+SEOAudit.belongsTo(Site, {
+  foreignKey: 'site_id'
+});
+
+Campaign.hasOne(CampaignStats, { 
+  foreignKey: 'campaign_id',
+  onDelete: 'CASCADE'
+});
+CampaignStats.belongsTo(Campaign, {
+  foreignKey: 'campaign_id'
+});
 
 // SMTP Configuration
 const createTransporter = () => {
@@ -516,10 +724,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Find user
-    const user = await User.findOne({ where: { email } }).catch(err => {
-      console.log('Database query error:', err.message);
-      return null;
-    });
+    const user = await User.findOne({ where: { email } });
     
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
@@ -636,12 +841,12 @@ app.post('/api/audit', authenticateToken, async (req, res) => {
     // Perform independent SEO audit
     const auditResult = await SEOAuditor.performAudit(targetUrl);
     
-    // Save audit results if site record exists
+    // Save audit results if site record exists (using JSONB for PostgreSQL)
     if (siteRecord) {
       await SEOAudit.create({
         site_id: siteRecord.id,
         score: auditResult.score,
-        recommendations: JSON.stringify(auditResult.recommendations)
+        recommendations: auditResult.recommendations // Direct JSON object for JSONB
       });
 
       // Update site score and last audit date
@@ -959,12 +1164,21 @@ app.get('/api/dashboard', authenticateToken, async (req, res) => {
 });
 
 // Health check route
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'unknown';
+  
+  try {
+    await sequelize.authenticate();
+    dbStatus = 'connected';
+  } catch (error) {
+    dbStatus = 'disconnected';
+  }
+  
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     services: {
-      database: 'unknown', // Would need to test connection
+      database: dbStatus,
       smtp: !!process.env.SMTP_USER,
       seo: 'available' // Playwright is always available once installed
     }
@@ -985,70 +1199,43 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Database initialization function with better error handling
+// Database initialization function with PostgreSQL optimizations
 async function initializeDatabase() {
   try {
-    console.log('🔄 Testing database connection...');
+    console.log('🔄 Testing PostgreSQL connection...');
     await sequelize.authenticate();
-    console.log('✅ Database connection established successfully.');
+    console.log('✅ PostgreSQL connection established successfully.');
 
-    console.log('🔄 Checking database structure...');
+    console.log('🔄 Synchronizing database schema...');
     
-    // Try to sync with alter: false first to avoid modifying existing tables
-    try {
-      await sequelize.sync({ alter: false });
-      console.log('✅ Database structure is up to date.');
-    } catch (syncError) {
-      console.log('⚠️ Database structure needs updates, attempting safe sync...');
-      
-      // If sync fails, try with alter: true but with better error handling
-      try {
-        await sequelize.sync({ alter: true });
-        console.log('✅ Database structure updated successfully.');
-      } catch (alterError) {
-        console.error('❌ Database sync failed:', alterError.message);
-        
-        // If alter fails due to table full error, suggest solutions
-        if (alterError.message.includes('table') && alterError.message.includes('full')) {
-          console.error('\n💡 SOLUTION SUGGESTIONS:');
-          console.error('1. Check your database storage quota');
-          console.error('2. Clean up old data if possible');
-          console.error('3. Contact your hosting provider to increase storage');
-          console.error('4. Try using force: true (WARNING: This will drop all tables!)');
-          console.error('\nTo force recreate tables (DANGER - ALL DATA WILL BE LOST):');
-          console.error('Set environment variable: FORCE_DB_SYNC=true');
-          
-          // Check if force sync is requested
-          if (process.env.FORCE_DB_SYNC === 'true') {
-            console.log('⚠️ FORCE SYNC REQUESTED - DROPPING ALL TABLES...');
-            await sequelize.sync({ force: true });
-            console.log('✅ Database tables recreated (all data lost).');
-          } else {
-            throw alterError;
-          }
-        } else {
-          throw alterError;
-        }
-      }
+    // Use alter: true for development, force: true only when explicitly requested
+    const syncOptions = process.env.FORCE_DB_SYNC === 'true' 
+      ? { force: true } 
+      : { alter: true };
+    
+    await sequelize.sync(syncOptions);
+    
+    if (process.env.FORCE_DB_SYNC === 'true') {
+      console.log('✅ Database tables recreated (force mode - all data lost).');
+    } else {
+      console.log('✅ Database schema synchronized successfully.');
     }
     
     return true;
   } catch (error) {
     console.error('❌ Database initialization failed:', error.message);
     
-    // Provide specific error handling for common issues
+    // Provide specific error handling for PostgreSQL
     if (error.name === 'SequelizeConnectionError') {
-      console.error('\n💡 Database connection failed. Check:');
+      console.error('\n💡 PostgreSQL connection failed. Check:');
       console.error('- DATABASE_URL environment variable');
-      console.error('- MySQL server is running');
+      console.error('- PostgreSQL server is running');
+      console.error('- SSL configuration (required for Render)');
       console.error('- Credentials are correct');
-      console.error('- Network connectivity');
-    } else if (error.name === 'SequelizeDatabaseError' && error.message.includes('full')) {
-      console.error('\n💡 Database storage full. Solutions:');
-      console.error('- Free up disk space on your database server');
-      console.error('- Increase storage quota');
-      console.error('- Clean up old/unused data');
-      console.error('- Contact your hosting provider');
+    } else if (error.message.includes('permission denied')) {
+      console.error('\n💡 Permission denied. Check:');
+      console.error('- Database user has necessary privileges');
+      console.error('- Database exists and is accessible');
     }
     
     return false;
@@ -1073,13 +1260,15 @@ async function startServer() {
       
       // Log configuration status
       console.log('\n📋 Configuration Status:');
-      console.log('  - Database:', dbInitialized ? '✅ Connected' : '❌ Disconnected');
+      console.log('  - Database:', dbInitialized ? '✅ PostgreSQL Connected' : '❌ PostgreSQL Disconnected');
       console.log('  - SMTP:', process.env.SMTP_USER ? '✅ Configured' : '❌ Not configured');
       console.log('  - JWT Secret:', JWT_SECRET !== 'your-super-secret-jwt-key-change-in-production' ? '✅ Custom' : '⚠️ Default');
       
       if (!dbInitialized) {
         console.log('\n⚠️ WARNING: Database not available - some features will not work');
         console.log('   SEO audits will still function independently');
+      } else {
+        console.log('\n✅ All systems operational - PostgreSQL database ready');
       }
     });
   } catch (error) {
@@ -1093,6 +1282,7 @@ process.on('SIGTERM', async () => {
   console.log('🔄 SIGTERM received, shutting down gracefully...');
   try {
     await sequelize.close();
+    console.log('✅ Database connection closed.');
   } catch (error) {
     console.error('Error closing database connection:', error.message);
   }
@@ -1103,6 +1293,7 @@ process.on('SIGINT', async () => {
   console.log('\n🔄 SIGINT received, shutting down gracefully...');
   try {
     await sequelize.close();
+    console.log('✅ Database connection closed.');
   } catch (error) {
     console.error('Error closing database connection:', error.message);
   }
