@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO & Email Marketing SaaS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; margin: -20px -20px 24px -20px; border-radius: 12px 12px 0 0; }
+        .btn { background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
+        .btn:hover { background: #5a67d8; transform: translateY(-1px); }
+        .btn-success { background: #48bb78; }
+        .btn-success:hover { background: #38a169; }
+        .btn-danger { background: #f56565; }
+        .btn-danger:hover { background: #e53e3e; }
+        .form-group { margin-bottom: 16px; }
+        .form-control { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: border-color 0.3s; }
+        .form-control:focus { outline: none; border-color: #667eea; }
+        .alert { padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+        .alert-success { background: #c6f6d5; color: #2f855a; border: 1px solid #9ae6b4; }
+        .alert-danger { background: #fed7d7; color: #c53030; border: 1px solid #feb2b2; }
+        .hidden { display: none; }
+        .grid { display: grid; gap: 24px; }
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 24px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; min-width: 150px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #718096; margin-top: 8px; }
+        .site-item, .contact-item, .campaign-item { background: #f7fafc; padding: 16px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .score { padding: 4px 8px; border-radius: 20px; color: white; font-weight: bold; }
+        .score-good { background: #48bb78; }
+        .score-medium { background: #ed8936; }
+        .score-bad { background: #f56565; }
+        .recommendations { margin-top: 12px; }
+        .recommendations ul { padding-left: 20px; }
+        .recommendations li { margin-bottom: 8px; color: #4a5568; }
+        .nav { display: flex; gap: 16px; margin-bottom: 24px; }
+        .nav-btn { background: transparent; color: #667eea; border: 2px solid #667eea; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .nav-btn.active, .nav-btn:hover { background: #667eea; color: white; }
+        .loading { text-align: center; padding: 20px; color: #718096; }
+        textarea { min-height: 120px; resize: vertical; }
+        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .stats { flex-direction: column; gap: 16px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page de connexion -->
+        <div id="authPage" class="card">
+            <div class="header">
+                <h1>🚀 SEO & Email Marketing SaaS</h1>
+                <p>Optimisez votre SEO et gérez vos campagnes email</p>
+            </div>
+            
+            <div id="authTabs" class="nav">
+                <button class="nav-btn active" onclick="showLogin()">Connexion</button>
+                <button class="nav-btn" onclick="showSignup()">Inscription</button>
+            </div>
+
+            <div id="loginForm">
+                <h2 style="margin-bottom: 24px;">Connexion</h2>
+                <div class="form-group">
+                    <input type="email" id="loginEmail" class="form-control" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Mot de passe">
+                </div>
+                <button onclick="login()" class="btn">Se connecter</button>
+            </div>
+
+            <div id="signupForm" class="hidden">
+                <h2 style="margin-bottom: 24px;">Inscription</h2>
+                <div class="form-group">
+                    <input type="text" id="signupName" class="form-control" placeholder="Nom complet">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="signupEmail" class="form-control" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="signupPassword" class="form-control" placeholder="Mot de passe">
+                </div>
+                <button onclick="signup()" class="btn">S'inscrire</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <div class="header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p id="welcomeText">Bienvenue dans votre espace SEO & Email Marketing</p>
+                    </div>
+                    <button onclick="logout()" class="btn btn-danger">Déconnexion</button>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="statsites">0</div>
+                    <div class="stat-label">Sites SEO</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statContacts">0</div>
+                    <div class="stat-label">Contacts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statCampaigns">0</div>
+                    <div class="stat-label">Campagnes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statScore">0</div>
+                    <div class="stat-label">Score SEO moyen</div>
+                </div>
+            </div>
+
+            <!-- Navigation sections -->
+            <div class="nav">
+                <button class="nav-btn active" onclick="showSection('seo')">SEO</button>
+                <button class="nav-btn" onclick="showSection('email')">Email Marketing</button>
+            </div>
+
+            <!-- Section SEO -->
+            <div id="seoSection" class="grid grid-2">
+                <div class="card">
+                    <h3>🔍 Gestion des Sites</h3>
+                    <div class="form-group">
+                        <input type="url" id="siteUrl" class="form-control" placeholder="https://example.com">
+                    </div>
+                    <button onclick="addSite()" class="btn">Ajouter un site (3 max)</button>
+                    <div id="sitesList"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>📊 Audit SEO</h3>
+                    <p>Sélectionnez un site et lancez un audit pour obtenir votre score SEO et des recommandations.</p>
+                    <div id="auditResults"></div>
+                </div>
+            </div>
+
+            <!-- Section Email Marketing -->
+            <div id="emailSection" class="grid grid-2 hidden">
+                <div class="card">
+                    <h3>👥 Contacts</h3>
+                    <div class="form-group">
+                        <input type="text" id="contactName" class="form-control" placeholder="Nom du contact">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="contactEmail" class="form-control" placeholder="Email du contact">
+                    </div>
+                    <button onclick="addContact()" class="btn">Ajouter contact (50 max)</button>
+                    <div id="contactsList"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>📧 Campagnes Email</h3>
+                    <div class="form-group">
+                        <input type="text" id="campaignTitle" class="form-control" placeholder="Titre de la campagne">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="campaignContent" class="form-control" placeholder="Contenu HTML de votre email..."></textarea>
+                    </div>
+                    <button onclick="createCampaign()" class="btn">Créer campagne (3 actives max)</button>
+                    <div id="campaignsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let user = JSON.parse(localStorage.getItem('user') || 'null');
+
+        // Initialisation
+        if (token && user) {
+            showDashboard();
+        }
+
+        // Fonctions d'authentification
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('signupForm').classList.add('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function showSignup() {
+            document.getElementById('signupForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    token = data.token;
+                    user = data.user;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(user));
+                    showMessage('Connexion réussie!', 'success');
+                    showDashboard();
+                } else {
+                    showMessage(data.error, 'danger');
+                }
+            } catch (err) {
+                showMessage('Erreur de connexion', 'danger');
+            }
+        }
+
+        async function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    token = data.token;
+                    user = data.user;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(user));
+                    showMessage('Compte créé avec succès!', 'success');
+                    showDashboard();
+                } else {
+                    showMessage(data.error, 'danger');
+                }
+            } catch (err) {
+                showMessage('Erreur d\'inscription', 'danger');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            token = null;
+            user = null;
+            showAuth();
+        }
+
+        function showAuth() {
+            document.getElementById('authPage').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+        }
+
+        async function showDashboard() {
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('welcomeText').textContent = `Bienvenue, ${user.name}!`;
+            
+            await loadDashboardStats();
+            await loadSites();
+            await loadContacts();
+            await loadCampaigns();
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (section === 'seo') {
+                document.getElementById('seoSection').classList.remove('hidden');
+                document.getElementById('emailSection').classList.add('hidden');
+            } else {
+                document.getElementById('emailSection').classList.remove('hidden');
+                document.getElementById('seoSection').classList.add('hidden');
+            }
+        }
+
+        // API calls avec authentification
+        async function apiCall(url, options = {}) {
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                ...options
+            };
+            
+            const response = await fetch(url, config);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Erreur API');
+            }
+            
+            return data;
+        }
+
+        // Dashboard
+        async function loadDashboardStats() {
+            try {
+                const stats = await apiCall('/api/dashboard/stats');
+                document.getElementById('statsites').textContent = stats.sites;
+                document.getElementById('statContacts').textContent = stats.contacts;
+                document.getElementById('statCampaigns').textContent = stats.campaigns;
+                document.getElementById('statScore').textContent = stats.avgSeoScore;
+            } catch (err) {
+                console.error('Erreur stats:', err);
+            }
+        }
+
+        // Fonctions SEO
+        async function loadSites() {
+            try {
+                const sites = await apiCall('/api/sites');
+                const sitesList = document.getElementById('sitesList');
+                
+                if (sites.length === 0) {
+                    sitesList.innerHTML = '<div class="loading">Aucun site ajouté</div>';
+                    return;
+                }
+                
+                sitesList.innerHTML = sites.map(site => `
+                    <div class="site-item">
+                        <div>
+                            <strong>${site.url}</strong>
+                            <div>
+                                <span class="score ${getScoreClass(site.score)}">${site.score || 0}/100</span>
+                                <small style="margin-left: 12px; color: #718096;">
+                                    Dernier audit: ${new Date(site.last_audit).toLocaleDateString()}
+                                </small>
+                            </div>
+                            ${site.SeoAudits && site.SeoAudits.length > 0 ? `
+                                <div class="recommendations">
+                                    <strong>Recommandations:</strong>
+                                    <ul>
+                                        ${site.SeoAudits[0].recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <button onclick="auditSite(${site.id})" class="btn">Auditer</button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showMessage('Erreur lors du chargement des sites', 'danger');
+            }
+        }
+
+        async function addSite() {
+            const url = document.getElementById('siteUrl').value.trim();
+            if (!url) {
+                showMessage('Veuillez saisir une URL', 'danger');
+                return;
+            }
+
+            try {
+                await apiCall('/api/sites', {
+                    method: 'POST',
+                    body: JSON.stringify({ url })
+                });
+                
+                document.getElementById('siteUrl').value = '';
+                showMessage('Site ajouté avec succès!', 'success');
+                loadSites();
+                loadDashboardStats();
+            } catch (err) {
+                showMessage(err.message, 'danger');
+            }
+        }
+
+        async function auditSite(siteId) {
+            try {
+                showMessage('Audit en cours...', 'success');
+                const result = await apiCall('/api/audit', {
+                    method: 'POST',
+                    body: JSON.stringify({ siteId })
+                });
+                
+                showMessage('Audit terminé!', 'success');
+                loadSites();
+                loadDashboardStats();
+                
+                const auditResults = document.getElementById('auditResults');
+                auditResults.innerHTML = `
+                    <div style="margin-top: 20px; padding: 20px; background: #f7fafc; border-radius: 8px;">
+                        <h4>Résultats de l'audit</h4>
+                        <div style="margin: 16px 0;">
+                            <span class="score ${getScoreClass(result.audit.score)}">${result.audit.score}/100</span>
+                        </div>
+                        <div class="recommendations">
+                            <strong>Recommandations:</strong>
+                            <ul>
+                                ${result.audit.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                showMessage('Erreur lors de l\'audit: ' + err.message, 'danger');
+            }
+        }
+
+        // Fonctions Email Marketing
+        async function loadContacts() {
+            try {
+                const contacts = await apiCall('/api/contacts');
+                const contactsList = document.getElementById('contactsList');
+                
+                if (contacts.length === 0) {
+                    contactsList.innerHTML = '<div class="loading">Aucun contact ajouté</div>';
+                    return;
+                }
+                
+                contactsList.innerHTML = contacts.map(contact => `
+                    <div class="contact-item">
+                        <div>
+                            <strong>${contact.name}</strong>
+                            <div style="color: #718096;">${contact.email}</div>
+                        </div>
+                        <small style="color: #a0aec0;">
+                            ${new Date(contact.createdAt).toLocaleDateString()}
+                        </small>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showMessage('Erreur lors du chargement des contacts', 'danger');
+            }
+        }
+
+        async function addContact() {
+            const name = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            
+            if (!name || !email) {
+                showMessage('Veuillez saisir le nom et l\'email', 'danger');
+                return;
+            }
+
+            try {
+                await apiCall('/api/contacts', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email })
+                });
+                
+                document.getElementById('contactName').value = '';
+                document.getElementById('contactEmail').value = '';
+                showMessage('Contact ajouté avec succès!', 'success');
+                loadContacts();
+                loadDashboardStats();
+            } catch (err) {
+                showMessage(err.message, 'danger');
+            }
+        }
+
+        async function loadCampaigns() {
+            try {
+                const campaigns = await apiCall('/api/campaigns');
+                const campaignsList = document.getElementById('campaignsList');
+                
+                if (campaigns.length === 0) {
+                    campaignsList.innerHTML = '<div class="loading">Aucune campagne créée</div>';
+                    return;
+                }
+                
+                campaignsList.innerHTML = campaigns.map(campaign => `
+                    <div class="campaign-item">
+                        <div>
+                            <strong>${campaign.title}</strong>
+                            <div style="color: #718096; margin: 8px 0;">
+                                Status: <span style="color: ${getStatusColor(campaign.status)}; font-weight: bold;">
+                                    ${getStatusText(campaign.status)}
+                                </span>
+                            </div>
+                            ${campaign.CampaignStat ? `
+                                <div style="font-size: 12px; color: #a0aec0;">
+                                    📊 Ouvertures: ${campaign.CampaignStat.opens} | 
+                                    Clics: ${campaign.CampaignStat.clicks} | 
+                                    Désabonnements: ${campaign.CampaignStat.unsubscribes}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div>
+                            ${campaign.status === 'draft' ? `
+                                <button onclick="sendCampaign(${campaign.id})" class="btn btn-success">Envoyer</button>
+                            ` : `
+                                <small style="color: #718096;">
+                                    ${campaign.sent_at ? new Date(campaign.sent_at).toLocaleDateString() : ''}
+                                </small>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showMessage('Erreur lors du chargement des campagnes', 'danger');
+            }
+        }
+
+        async function createCampaign() {
+            const title = document.getElementById('campaignTitle').value.trim();
+            const content = document.getElementById('campaignContent').value.trim();
+            
+            if (!title || !content) {
+                showMessage('Veuillez saisir le titre et le contenu', 'danger');
+                return;
+            }
+
+            try {
+                await apiCall('/api/campaigns', {
+                    method: 'POST',
+                    body: JSON.stringify({ title, content })
+                });
+                
+                document.getElementById('campaignTitle').value = '';
+                document.getElementById('campaignContent').value = '';
+                showMessage('Campagne créée avec succès!', 'success');
+                loadCampaigns();
+                loadDashboardStats();
+            } catch (err) {
+                showMessage(err.message, 'danger');
+            }
+        }
+
+        async function sendCampaign(campaignId) {
+            if (!confirm('Êtes-vous sûr de vouloir envoyer cette campagne?')) return;
+            
+            try {
+                showMessage('Envoi en cours...', 'success');
+                const result = await apiCall(`/api/campaigns/${campaignId}/send`, {
+                    method: 'POST'
+                });
+                
+                showMessage(result.message, 'success');
+                loadCampaigns();
+            } catch (err) {
+                showMessage('Erreur lors de l\'envoi: ' + err.message, 'danger');
+            }
+        }
+
+        // Fonctions utilitaires
+        function getScoreClass(score) {
+            if (score >= 80) return 'score-good';
+            if (score >= 60) return 'score-medium';
+            return 'score-bad';
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'sent': return '#48bb78';
+                case 'active': return '#ed8936';
+                default: return '#718096';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'sent': return 'Envoyée';
+                case 'active': return 'Active';
+                case 'draft': return 'Brouillon';
+                default: return status;
+            }
+        }
+
+        function showMessage(message, type) {
+            const messages = document.getElementById('messages');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            messages.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
